@@ -36,6 +36,11 @@ public class CustomerResource {
         customerService.deleteCustomer(customerId);
     }
 
+    @PutMapping(value = "/{customerId}")
+    public Customer updateCustomer(@PathVariable("customerId") int customerId,
+                                   @RequestBody Customer customer){
+        return customerService.updateCustomer(customerId, customer);
+    }
 
 
 

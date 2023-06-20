@@ -2,11 +2,12 @@ package com.dhananjay.project1.Service;
 
 import com.dhananjay.project1.Model.Customer;
 import com.dhananjay.project1.dao.CustomerDAO;
+import com.dhananjay.project1.exception.CustomerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Optional;
 
 @Component
 public class CustomerService {
@@ -14,45 +15,36 @@ public class CustomerService {
     @Autowired
     private CustomerDAO customerDAO;
 
-    private int customerId = 1;
-    private List<Customer> customerList = new CopyOnWriteArrayList<>();
-
     public  Customer addCustomer(Customer customer){
-        customer.setCustomerID(customerId);
-        customerId += 1;
-        customerList.add(customer);
-        return customer;
+
+        return customerDAO.save(customer);
+
     }
 
     public List<Customer> getCustomers(){
-        return customerList;
+        return customerDAO.findAll();
     }
 
     public  Customer getCustomer(int customerId){
-        return customerList.
-                stream().
-                filter(c -> c.getCustomerID() == customerId).
-                findFirst().
-                get();
+
+        Optional<Customer> optionalCustomer = customerDAO.findById(customerId);
+
+        if (optionalCustomer.isEmpty()){
+            throw new CustomerNotFoundException("Customer Record is Not Available");
+        }
+
+        return optionalCustomer.get();
+
     }
 
     public Customer updateCustomer(int customerId, Customer customer){
-        customerList.stream().forEach(c-> {
-            if (c.getCustomerID() == customerId){
-                c.setCustomerFirstName(customer.getCustomerFirstName());
-                c.setCustomerLastName(customer.getCustomerLastName());
-                c.setCustomerEmail(customer.getCustomerEmail());
-            }
-        });
-        return customerList.stream().filter(c-> c.getCustomerID() == customerId).findFirst().get();
+        customer.setCustomerID(customerId);
+        return customerDAO.save(customer);
     }
 
     public void deleteCustomer(int customerId){
-        customerList.stream().forEach(c-> {
-            if (c.getCustomerID() == customerId){
-                customerList.remove(c);
-            }
-        });
+        customerDAO.deleteById(customerId);
     }
+
 
 }
